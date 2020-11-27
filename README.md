@@ -1,58 +1,118 @@
-# Docker
 
-1. 개요  
-	Container 기반의 오픈소스 가상화 플랫폼
+# 1. Docker
 
-2. 구조  
-	Docker는 하나의 실행 파일이지만 실제로는 Client와 Server로 구성됨.  
-	Docker Command를 입력하면 Docker Client가 Docker Server로 명령을 전송하고 결과를 받아 터미널에 출력해줌.  
-	이러한 구조로 OS에 관계없이 Docker Container가 동작할 수 있음.  
-	아래 Command 입력시 Client와 Server 정보가 출력됨.  
-   > docker version  
-	※ permission 문제로 Server 정보 미출력시 아래 Command 입력  
-	sudo docker version
+## 개요  
+Container 기반의 오픈소스 가상화 플랫폼
 
-3. Docker Image  
-	Container 실행에 필요한 파일과 설정값 등을 포함하고 있음.  
-	Container는 Docker Image를 실행한 상태라고 볼 수 있고, Container에서 동작하는 Application에 추가되거나 변경된 값은 Container 내부에 저장됨.
+## 구조  
+Docker는 하나의 실행 파일이지만 실제로는 Client와 Server로 구성됨.  
+Docker Command를 입력하면 Docker Client가 Docker Server로 명령을 전송하고 결과를 받아 터미널에 출력해줌.  
+이러한 구조로 OS에 관계없이 Docker Container가 동작할 수 있음.  
+아래 Command 입력시 Client와 Server 정보가 출력됨.  
+> docker version  
+※ permission 문제로 Server 정보 미출력시 아래 Command 입력  
+sudo docker version
 
-4. Layer 저장 방식  
-	유니온 파일 시스템을 이용하여 여러개의 레이어를 하나의 파일 시스템으로 사용할 수 있게 해줌.  
-	이미지는 여러개의 읽기 전용 레이어로 구성되고 파일이 추가되거나 수정되면 새로운 레이어가 생성됨.  
+## Docker Image  
+Container 실행에 필요한 파일과 설정값 등을 포함하고 있음.  
+Container는 Docker Image를 실행한 상태라고 볼 수 있고, Container에서 동작하는 Application에 추가되거나 변경된 값은 Container 내부에 저장됨.
 
-5. 명령어  
-	* Container 실행  
-		docker run [**option**] [**image**]  
-		ex) docker run **ubuntu:16.04**
+## Layer 저장 방식  
+유니온 파일 시스템을 이용하여 여러개의 레이어를 하나의 파일 시스템으로 사용할 수 있게 해줌.  
+이미지는 여러개의 읽기 전용 레이어로 구성되고 파일이 추가되거나 수정되면 새로운 레이어가 생성됨.  
 
-	* Container 중지  
-		docker stop [**container**]  
-		ex) docker stop **mysql**
+## 명령어
+   * Container 실행  
+	docker run [**option**] [**image**]  
+	ex) docker run **ubuntu:16.04**
 
-	* Container 제거  
-		docker rm [**container**]  
-		ex) docker rm **mysql**
+   * Container 중지  
+	docker stop [**container**]  
+	ex) docker stop **mysql**
+
+   * Container 제거  
+	docker rm [**container**]  
+	ex) docker rm **mysql**
 		
-	* Image 목록  
-		docker **images**
+   * Image 목록  
+	docker **images**
 		
-	* Image 삭제  
-		docker rmi [**image**]  
-		ex) docker rmi **ubuntu:16.04**
+   * Image 삭제  
+	docker rmi [**image**]  
+	ex) docker rmi **ubuntu:16.04**
 
-6. ETC  
-	* Container에서 실행되는 Application의 Log 및 Data File은 Container 내부에 저장되기 때문에 Container가 삭제되면 해당 File도 영구적으로 삭제됨.  
-	Volume 설정을 통해 Host의 Directory 및 File을 Container에서 사용.  
-	Container가 삭제 되도 수정 및 추가 된 File은 Volume으로 설정된 Directory에 저장되어 재사용이 가능함.  
-		>docker run -v [**host path**]:[**container path**] [**image**]  
-		ex) docker run -d **-v /my/own/datadir:/var/lib/mysql** mysql
+## ETC  
+* Container에서 실행되는 Application의 Log 및 Data File은 Container 내부에 저장되기 때문에 Container가 삭제되면 해당 File도 영구적으로 삭제됨.  
+Volume 설정을 통해 Host의 Directory 및 File을 Container에서 사용.  
+Container가 삭제 되도 수정 및 추가 된 File은 Volume으로 설정된 Directory에 저장되어 재사용이 가능함.  
+	>docker run -v [**host path**]:[**container path**] [**image**]  
+	ex) docker run -d **-v /my/own/datadir:/var/lib/mysql** mysql
 	
-	* 외부에서 Container 내부에 실행되는 Application에 접근하기 위해서 Port Forwarding 설정.  
-		> docker run -p [**host port**]:[**container port**] [**image**]  
-		ex) docker run -d **-p 3306:3306** mysql
-		
+* 외부에서 Container 내부에 실행되는 Application에 접근하기 위해서 Port Forwarding 설정.  
+	>docker run -p [**host port**]:[**container port**] [**image**]  
+	ex) docker run -d **-p 3306:3306** mysql
 
-# Kubernetes
+# 2. Docker Compose
+
+## 개요
+다중 Container Application을 정의하고 공유하 수 있도록 개발된 도구
+
+## 설정 (docker-compose.yml)
+> 해당 설정은 version 2.2 버전임.   
+> 버전마다 작성 방법이 다를 수 있음.
+```yaml
+version: '2.2'   ## compose 파일 버전
+
+services:
+  tomcat:  ## service name
+    container_name: tomcat  ## container name
+    image: tomcat   ## image name
+    ports:
+      - 8080:8080   ## port forwarding
+    volumes:
+      - /test:/test   ## volume setting
+    environment:      ## 환경 설정
+     - TZ=Asia/Seoul
+  mysql:
+    container_name: mysql
+    image: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - TZ=Asia/Seoul
+    command: mysqld --character-set-server=utf8, --sql_mode=""  ## 실행 command 설정
+```
+
+## 명령어
+> ※ 설정 파일 (yml)이 있는 곳에서 명령어 실행
+
+* 모든 Container 생성 및 실행  
+docker-compose -d **up**  
+
+* 모든 Container 중지 및 삭제  
+docker-compose **down** 
+
+* 모든 Container 실행  
+docker-compose **start**  
+		
+* 모든 Container 중지  
+docker-compose **stop**
+		
+* 단일 Container 조작  
+docker-compose [**up** | **down** | **start** | **stop**] [**service**]  
+ex) docker-compose **start tomcat**
+	
+* Service 목록 조회  
+docker-compose **ps**
+
+* 설정 파일 지정  
+docker-compose **-f** [**file path**] [**up** | **down** | **start** | **stop**]  
+ex) docker-compose **-f /tmp/docker-compose.yml start**
+
+# 3. Kubernetes
 
 ## 개요
 
