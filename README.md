@@ -174,62 +174,65 @@ kube-proxy는 운영 체제에 가용한 패킷 필터링 계층이 있는 경�
 * **컨테이너 런타임 (docker)**  
 컨테이너 런타임은 컨테이너 실행을 담당하는 소프트웨어다.
 
-## Resource 종류
-
+## Kubernetes Object
+>Kubernetes Object는 Kubernetes 시스템에서 영속성을 가지는 개체이다.  
+Kuberentes는 cluster의 상태를 나타내기 위해 이 개체를 사용한다.  
+Kubernetes Object는 하나의 **의도를 담은 레코드** 이다.  
+Object를 생성하게 되면, Kubernetes 시스템은 그 Object 생성을 보장하기 위해 지속적으로 작동할 것이다.  
+Object를 생성함으로써, Cluster의 워크로드를 어떤 형태로 보이고자 하는지에 대해 효과적으로 Kubernetes 시스템에 전한다.
  1. **Pod**
  * kubernetes에서 생성하고 관리할 수 있는 배포 가능한 가장 작은 컴퓨팅 단위
  * 하나 이상의 컨테이너 그룹
  * 그룹은 스토리지/네트워크를 공유하고, 해당 컨테이너를 구동하는 방식에 대한 명세를 갖음
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-nginx
+apiVersion: v1   ## kubernetes api version
+kind: Pod        ## kubernetes 리소스 종류
+metadata:        ## 리소스 메타데이터
+  name: test-nginx      ## Pod 이름
   labels:
-    app: test
-spec:
-  containers:
-    - name: web
-      image: nginx
-      ports:
-        - name: web
-          containerPort: 80
-          protocol: TCP
+    app: test    ## Service 등에서 mapping을 위해 사용하는 값
+spec:            ## Pod 상세 정보
+  containers:    ## Pod에 속하는 컨테이너 목록
+  - name: web     ## 컨테이너 이름. Cluster 내부에서 DNS_LABEL로서 사용
+    image: nginx    ## 컨테이너 이미지
+    ports:
+    - containerPort: 80   ## 컨테이너 공개 포트
 ```
 
  2. **ReplicaSet**
+ * 레플리카 Pod 집합의 실행을 항상 안정적으로 유지  
+ * ReplicaSet은 보통 명시된 동일 Pod 개수에 대한 사용성을 보증하는데 사용
  ```yaml
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: frontend
-  labels:
-    app: guestbook
-    tier: frontend
+  name: test-nginx  ## ReplicaSet 이름
 spec:
-  # 케이스에 따라 레플리카를 수정한다.
-  replicas: 3
-  selector:
+  replicas: 3  ## Cluster 안에서 가동시킬 Pod의 수. default는 1
+  selector:    ## 가동 시킬 Pod 셀렉터. Pod의 label과 일치해야 함
     matchLabels:
-      tier: frontend
+      app: test   ## 셀렉터 조건
   template:
     metadata:
       labels:
-        tier: frontend
-    spec:
+        app: test   ## 셀렉터 조건과 비교하는 값
+    spec:           ## Pod 상세 정보
       containers:
-      - name: php-redis
-        image: gcr.io/google_samples/gb-frontend:v3
+      - name: web
+        image: nginx
 ```
 
  3. **Deployment**
+ * Deployment는 Pod와 ReplicaSet에 대한 선언적 업데이트를 제공  
+ * 의도하는 상태를 설명하고, 디플로이먼트 컨트롤러는 현재 상태에서 의도하는 상태로 비율을 조정하며 변경한다.  
+ * 새 ReplicaSet을 생성하는 Deployment를 정의하거나 기존 Deployment를 제거하고, 모든 리소스를 새 Deployment에 적용할 수 있다.
  ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx-deployment  ## Deployment 이름
   labels:
-    app: nginx
+    app: test
 spec:
   replicas: 3
   selector:
@@ -248,16 +251,18 @@ spec:
 ```
 
  4. **Service**
+ * Pod 집합에서 실행중인 애플리케이션을 네트워크 서비스로 노출하는 추상화 방법  
+ * Kubernetes는 Pod에게 고유한 IP주소와 Pod집합에 대한 단일 DNS명을 부여하고, Pod집합 간에 로드 밸런스를 수행할 수 있다.
 ```yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-service
+  name: my-service  ## Service 이름
 spec:
-  selector:
-    app: MyApp
+  selector:     ## Service에 연결되는 Pod를 찾는 셀렉터
+    app: test   ## 셀렉터 조건
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 9376
+      port: 80           ## Service Port
+      targetPort: 9376   ## Pod(Container) Port
 ```
